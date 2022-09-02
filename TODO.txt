@@ -1,0 +1,7 @@
+Done :
+test requêtes customers classiques
+
+to do : 
+test requêtes customers spéciaes
+vérifier doc customers
+test/doc autre composant

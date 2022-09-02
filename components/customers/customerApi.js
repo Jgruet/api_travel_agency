@@ -293,9 +293,9 @@ export default class CustomerApi {
             req.body
         );
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
 
@@ -343,9 +343,9 @@ export default class CustomerApi {
             req.params.id
         );
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
 
