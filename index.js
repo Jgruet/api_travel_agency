@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-import express from 'express';
+import dotenv from "dotenv";
+import express from "express";
 
 const app = express();
 
@@ -11,18 +11,28 @@ dotenv.config();
 // l'option extended true permet de parser les objets
 // pour les formulaires
 app.use(express.urlencoded({ extended: true }));
- 
+
 //--------------------------------------------------------------------
 //      Chargement des routes liées à l'API
 //--------------------------------------------------------------------
-import apiRoutes from './routes/api.js';
-app.use('/api', apiRoutes);
- 
+import apiRoutes from "./routes/api.js";
+app.use("/api", apiRoutes);
+
+
+//--------------------------------------------------------------------
+//      Chargement des routes liées à l'API
+//--------------------------------------------------------------------
+/* import webRoutes from "./routes/web.js";
+app.use("/", apiRoutes); */
+
+
 //--------------------------------------------------------------------
 //     Ecoute du serveur HTTP
 //--------------------------------------------------------------------
-app.listen(process.env.PORT,() => {
-    console.log(`Le serveur est démarré : http://localhost:${process.env.PORT}`);
+app.listen(process.env.PORT, () => {
+    console.log(
+        `Le serveur est démarré : http://localhost:${process.env.PORT}`
+    );
 });
- 
+
 export default app;

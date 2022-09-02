@@ -16,4 +16,8 @@ export default class TravelFixtures {
 
         return Promise.resolve(idTravel);
     }
+
+    async clearTravels(){
+        await travelRepository.clearTravels();
+    }
 }

@@ -1,17 +1,28 @@
 import connection from "../../config/db.js";
 
 export default class TravelRepository {
-    async getAll() {
-        const [rows] = await connection.execute("SELECT * FROM `travel`");
-        return rows;
+    async getAll(limit, offset) {
+        const [count] = await connection.execute("SELECT COUNT(id_travel) as total FROM `travel`");
+        const [rows] = await connection.execute("SELECT * FROM `travel` LIMIT ? OFFSET ?", 
+        [limit, offset]);
+        let result = {};
+        result.count = count[0].total;
+        result.travels = rows;
+        return result;
     }
 
     async getById(id) {
+        const [count] = await connection.execute(
+            `SELECT COUNT(id_travel) as total FROM travel WHERE id_travel = ?`, [id]
+        );
         const [rows] = await connection.execute(
             "SELECT * FROM `travel` WHERE `id_travel` = ?",
             [id]
         );
-        return rows[0];
+        let result = {};
+        result.count = count[0].total;
+        result.stay = rows;
+        return result;
     }
 
     async createTravel(travel) {
@@ -25,7 +36,7 @@ export default class TravelRepository {
                 travel.reduction,
             ]
         );
-        return insertRq[0].insertId;
+        return {"insertId" :insertRq[0].insertId};
     }
 
     async updateTravel(id, travel) {
@@ -40,7 +51,7 @@ export default class TravelRepository {
                 id,
             ]
         );
-        return updateRq[0].affectedRows;
+        return {"affectedRows" : updateRq[0].affectedRows};
     }
 
     async deleteTravel(id) {
@@ -48,6 +59,10 @@ export default class TravelRepository {
             "DELETE FROM `travel` WHERE `travel`.`id_travel` = ?",
             [id]
         );
-        return deleteRq[0].affectedRows;
+        return {"affectedRows" : deleteRq[0].affectedRows};
+    }
+
+    async clearTravels(){
+        await connection.execute('DELETE FROM `travel` WHERE 1')
     }
 }

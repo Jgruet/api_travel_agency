@@ -1,17 +1,29 @@
 import connection from "../../config/db.js";
 
 export default class StayRepository {
-    async getAll() {
-        const [rows] = await connection.execute("SELECT * FROM `stay`");
-        return rows;
+    async getAll(limit, offset) {
+        const [count] = await connection.execute(
+            'SELECT COUNT(id_stay) as total FROM `stay`'
+        );
+        const [rows] = await connection.execute('SELECT * FROM `stay` LIMIT ? OFFSET ?', [limit, offset]);
+        let result = {};
+        result.count = count[0].total;
+        result.stays = rows;
+        return result;
     }
 
     async getById(id) {
+        const [count] = await connection.execute(
+            'SELECT COUNT(id_stay) as total FROM `stay` WHERE id_stay = ?', [id]
+        );
         const [rows] = await connection.execute(
             "SELECT * FROM `stay` WHERE `id_stay` = ?",
             [id]
         );
-        return rows[0];
+        let result = {};
+        result.count = count[0].total;
+        result.stay = rows;
+        return result;
     }
 
     async createStay(stay) {
@@ -19,7 +31,7 @@ export default class StayRepository {
             "INSERT INTO `stay` (id_travel, start_at, end_at, id_main_customer) VALUES (?, ?, ?, ?)",
             [stay.id_travel, stay.start_at, stay.end_at, stay.id_main_customer]
         );
-        return insertRq[0].insertId;
+        return {"insertId" : insertRq[0].insertId};
     }
 
     async updateStay(id, stay) {
@@ -33,7 +45,7 @@ export default class StayRepository {
                 id,
             ]
         );
-        return updateRq[0].affectedRows;
+        return {"affectedRows" : updateRq[0].affectedRows};
     }
 
     async deleteStay(id) {
@@ -41,7 +53,7 @@ export default class StayRepository {
             "DELETE FROM `stay` WHERE `stay`.`id_stay` = ?",
             [id]
         );
-        return deleteRq[0].affectedRows;
+        return {"affectedRows" : deleteRq[0].affectedRows};
     }
 
     async bindCustomers(idStay, idCustomers) {

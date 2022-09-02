@@ -4,6 +4,15 @@ import CustomerApi from './customerApi.js';
 const router = express.Router();
 const customerApi = new CustomerApi();
 
+// get customers by holyday period
+router.get('/stay-dates', customerApi.getCustomersByHolydayPeriod); //les paramètres req, res sont envoyé automatiquement à la fonction getById
+
+// get customers by holyday period
+router.get('/hotel-booking/:id', customerApi.getCustomerInfoByHotelBooking); //les paramètres req, res sont envoyé automatiquement à la fonction getById
+
+// get customers by holyday period
+router.get('/plane-booking/:id', customerApi.getCustomerInfoByPlaneBooking); //les paramètres req, res sont envoyé automatiquement à la fonction getById
+
 // get customer by ID
 router.get('/:id', customerApi.getById); //les paramètres req, res sont envoyé automatiquement à la fonction getById
 

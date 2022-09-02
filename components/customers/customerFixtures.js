@@ -44,4 +44,8 @@ export default class CustomerFixtures {
 
         return Promise.resolve(companions);
     }
+
+    async clearCustomers(){
+        await customerRepository.clearCustomers();
+    }
 }

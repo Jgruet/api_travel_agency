@@ -32,12 +32,14 @@ export default class StayFixtures {
     }
 
     async bindFlightBooking(idCustomer) {
-        const idFlight = Math.floor(Math.random() * 100);
+        console.log('avion');
+        const idFlight = (Math.random()*1e32).toString(36);
         return await stayRepository.bindFlightBooking(idCustomer, idFlight);
     }
 
     async bindHotelBooking(idCustomer) {
-        const idHotel = Math.floor(Math.random() * 100);
+        console.log('hotel');
+        const idHotel = (Math.random()*1e32).toString(36);
         return await stayRepository.bindHotelBooking(idCustomer, idHotel);
     }
 }

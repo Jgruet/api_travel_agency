@@ -1,4 +1,3 @@
-
 import CustomerFixtures from "../components/customers/customerFixtures.js";
 import TravelFixtures from "../components/travels/travelFixtures.js";
 import StayFixtures from "../components/stays/stayFixtures.js";
@@ -7,27 +6,30 @@ const customerFixtures = new CustomerFixtures();
 const travelFixtures = new TravelFixtures();
 const stayFixtures = new StayFixtures();
 
-let stopProcess = [];
-for(let i = 0; i < process.argv[2]; i++) {
-    let promise = new Promise(async (resolve) => {
-        await travelFixtures.createTravel().then(async (idTravel) => {
-            await customerFixtures.createCustomer().then(async (idCustomer) => {
-                await stayFixtures.createStay(idTravel, idCustomer).then(async (idStay) => {
-                    await customerFixtures.createCompanion().then(async (companions) => {
-                        companions.push(idCustomer);
-                        await stayFixtures.bindCustomers(idStay, companions).then(async () => {
-                            await stayFixtures.bindHotelBooking(idCustomer).then(async () => {
-                                await stayFixtures.bindFlightBooking(idCustomer).then(() => {
-                                    resolve();
-                                 });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    })
-    stopProcess.push(promise);
+async function clearDatabase(){
+    await customerFixtures.clearCustomers();
+    await travelFixtures.clearTravels();
 }
 
-Promise.all(stopProcess).then(() => { process.exit(); })
+async function runFixtures(num = 1)
+{
+    if(num === 1){
+        await clearDatabase();
+    }
+    let idTravel = await travelFixtures.createTravel();
+    let idCustomer = await customerFixtures.createCustomer();
+    let idStay = await stayFixtures.createStay(idTravel, idCustomer);
+    let companions = await customerFixtures.createCompanion();
+    companions.push(idCustomer);
+    await stayFixtures.bindCustomers(idStay, companions);
+    await stayFixtures.bindHotelBooking(idCustomer);
+    await stayFixtures.bindFlightBooking(idCustomer);
+
+    if(num >= process.argv[2]) {
+        process.exit();
+    } else {
+        num++;
+        runFixtures(num);
+    }
+}
+runFixtures();
