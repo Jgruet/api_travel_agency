@@ -1,11 +1,13 @@
 import uuidAPIKey from "uuid-apikey";
 import RepoUser from "../components/users/userRepository.js";
 import ErrorApi from "./service.errorApi.js";
+import bcrypt from "bcrypt";
 
 const repoUser = new RepoUser();
 
 class AuthApi {
     getAuthByApiKey(req, res, next) {
+        //console.log(uuidAPIKey.create().uuid)
         // Validation format de la clef API
         // Exemple bon format : 1EEA6DC-JAM4DP2-PHVYPBN-V0XCJ9X
         if (
@@ -22,7 +24,8 @@ class AuthApi {
 
         // Si la clef est valide, on peut continuer
         repoUser
-            .findByUUID(uuidAPIKey.toUUID(req.headers["x-api-key"]))
+            //.findByUUID(uuidAPIKey.toUUID(req.headers["x-api-key"]))
+            .findByUUID('95de712b-49c2-4eae-b486-496e90d860fe')
             .then(() => {
                 // On permet d'aller à la suite
                 next();

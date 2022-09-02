@@ -27,52 +27,47 @@ export default class CustomerRepository {
     }
 
     async createCustomer(customer) {
-        if (customer.isCompanion === 0) {
-            const insertRq = await connection.execute(
-                "INSERT INTO `customer` (`firstname`, `lastname`, `birthdate`, `email`, `is_companion`) VALUES (?, ?, ?, ?, ?)",
-                [
-                    customer.firstname,
-                    customer.lastname,
-                    customer.birthdate,
-                    customer.email,
-                    customer.isCompanion,
-                ]
-            );
-            return {"insertId" : insertRq[0].insertId};
-        } else {
-            const insertRq = await connection.execute(
-                "INSERT INTO `customer` (firstname, lastname, birthdate, is_companion) VALUES (?, ?, ?, ?)",
-                [
-                    customer.firstname,
-                    customer.lastname,
-                    customer.birthdate,
-                    customer.isCompanion,
-                ]
-            );
-            return {"insertId" : insertRq[0].insertId};
+
+        if(customer.idUser === undefined){
+            customer.idUser = null;
         }
+        try{
+            const insertRq = await connection.execute(
+            "INSERT INTO `customer` (`firstname`, `lastname`, `birthdate`, `id_user`) VALUES (?, ?, ?, ?)",
+            [
+                customer.firstname,
+                customer.lastname,
+                customer.birthdate,
+                customer.idUser
+            ]
+            );
+            return {"insertId" : insertRq[0].insertId};
+        } catch(error){
+            if(error.code === "ER_NO_REFERENCED_ROW_2") {
+                return {SQLError : "Specified user does not exist"};
+            } else if(error.code === "ER_DUP_ENTRY") {
+                return {SQLError : "A customer is already bind to the given user"};
+            }
+        }
+        
     }
 
     async updateCustomer(id, customer) {
-        if (customer.isCompanion === 0) {
-            const updateRq = await connection.execute(
-                "UPDATE `customer` SET `firstname` = ?, `lastname` = ?, `birthdate` = ?, email` = ? WHERE `customer`.`id_customer` = ?",
-                [
-                    customer.firstname,
-                    customer.lastname,
-                    customer.birthdate,
-                    customer.email,
-                    id,
-                ]
-            );
-            return {"affectedRows" : updateRq[0].affectedRows};
-        } else {
-            const updateRq = await connection.execute(
-                "UPDATE `customer` SET `firstname` = ?, `lastname` =  ?, `birthdate` = ? WHERE `customer`.`id_customer` = ?",
-                [customer.firstname, customer.lastname, customer.birthdate, id]
-            );
-            return {"affectedRows" : updateRq[0].affectedRows};
+        try{
+        const updateRq = await connection.execute(
+            "UPDATE `customer` SET `firstname` = ?, `lastname` = ?, `birthdate` = ? WHERE `customer`.`id_customer` = ?",
+            [
+                customer.firstname,
+                customer.lastname,
+                customer.birthdate,
+                id,
+            ]
+        );
+        return {"affectedRows" : updateRq[0].affectedRows};
+        } catch(error){
+            console.log(error.code);
         }
+    
     }
 
     async deleteCustomer(id) {
@@ -104,7 +99,7 @@ export default class CustomerRepository {
 
     async getCustomerInfoByHotelBooking(id_booking, limit, offset) {
         const [count] = await connection.execute("SELECT COUNT(c.id_customer) as total FROM `hotel_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_hotel_booking= ?", [id_booking]);
-        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname, c.email FROM `hotel_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_hotel_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
+        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname FROM `hotel_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_hotel_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
         let result = {};
         result.count = count[0].total;
         result.customers = rows;
@@ -113,7 +108,7 @@ export default class CustomerRepository {
 
     async getCustomerInfoByPlaneBooking(id_booking, limit, offset) {
         const [count] = await connection.execute("SELECT COUNT(c.id_customer) as total FROM `plane_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_plane_booking= ?", [id_booking]);
-        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname, c.email FROM `plane_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_plane_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
+        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname FROM `plane_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_plane_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
         let result = {};
         result.count = count[0].total;
         result.customers = rows;

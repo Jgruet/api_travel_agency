@@ -38,7 +38,6 @@ export default class StayFixtures {
     }
 
     async bindHotelBooking(idCustomer) {
-        console.log('hotel');
         const idHotel = (Math.random()*1e32).toString(36);
         return await stayRepository.bindHotelBooking(idCustomer, idHotel);
     }

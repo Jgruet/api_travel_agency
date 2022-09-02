@@ -175,24 +175,23 @@ export default class CustomerApi {
      * @apiGroup Customers
      *
      * @apiBody {String} firstname       Customer's firstname
-     * @apiBody {String} lastname          Customer's lastname.
-     * @apiBody {Date} birthdate          Customer's birthdate.
-     * @apiBody {String} [email]          Customer's email. Necessary if you want to create a main customer, not necessary for a companion.
-     * @apiBody {Boolean} [isCompanion]    If = 1, customer is considered as companion.
+     * @apiBody {String} lastname        Customer's lastname.
+     * @apiBody {Date} birthdate         Customer's birthdate.
+     * @apiBody {Number} [idUser]        If undenifed, customer is considered as companion.
+     * 
      * @apiParamExample {json} Main-Customer-Example:
      * {
      *  "firstname": "Stéphane",
      *  "lastname": "Montané",
      *  "birthdate": "1992-01-19",
-     *  "email" : "steph1992@gmail.com",
-     *  "isCompanion": 0
+     *  "idUser": 12
      *  }
+     * 
      * @apiParamExample {json} Companion-Example:
      * {
      *  "firstname": "Stéphane",
      *  "lastname": "Montané",
-     *  "birthdate": "1992-01-19",
-     *  "isCompanion": 1
+     *  "birthdate": "1992-01-19"
      *  }
      *
      * @apiHeader {String} authorization x-api-key <API_KEY>
@@ -209,6 +208,13 @@ export default class CustomerApi {
      *       "code": 401,
      *       "status": "error"
      *      }
+     * 
+     * @apiError {json} sql-error Ressource given does not respect data integrity
+     * @apiErrorExample {json} Error-Response:
+     *     HTTP/1.1 400 BAD REQUEST
+     *     {
+     *       "SQLError": "A customer is already bind to the given user"
+     *      }
      *
      * @apiSuccess {json} result Customer created.
      * @apiSuccessExample {json} Success-Response:
@@ -219,8 +225,12 @@ export default class CustomerApi {
      *
      */
     async createCustomer(req, res) {
-        const insertId = await customerRepository.createCustomer(req.body);
-        res.status(200).json(insertId);
+        const result = await customerRepository.createCustomer(req.body);
+        if(result.SQLError != ""){
+            res.status(404).json(result);
+        } else {
+            res.status(200).json(result);
+        }
     }
 
     /**
