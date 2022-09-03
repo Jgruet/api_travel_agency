@@ -88,7 +88,7 @@ export default class CustomerRepository {
             [from, from, to, to, from, to]
         );
         const [rows] = await connection.execute(
-            `SELECT c.id_customer, c.email, s.id_travel, s.start_at, s.end_at FROM customer c JOIN stay s ON c.id_customer = s.id_main_customer WHERE (? >= s.start_at AND ? <= s.end_at) OR ((? >= s.start_at AND ? <= s.end_at) ) OR (?<s.start_at AND ?>s.end_at) LIMIT ? OFFSET ?`,
+            `SELECT c.id_customer, c.firstname, c.lastname, u.email, s.id_travel, s.start_at, s.end_at FROM customer c JOIN stay s ON c.id_customer = s.id_main_customer LEFT JOIN user u ON c.id_user = u.id_user WHERE (? >= s.start_at AND ? <= s.end_at) OR ((? >= s.start_at AND ? <= s.end_at) ) OR (?<s.start_at AND ?>s.end_at) LIMIT ? OFFSET ?`,
             [from, from, to, to, from, to, limit, offset]
         );
         let result = {};
@@ -99,7 +99,7 @@ export default class CustomerRepository {
 
     async getCustomerInfoByHotelBooking(id_booking, limit, offset) {
         const [count] = await connection.execute("SELECT COUNT(c.id_customer) as total FROM `hotel_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_hotel_booking= ?", [id_booking]);
-        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname FROM `hotel_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_hotel_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
+        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname, u.email FROM `hotel_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer LEFT JOIN user u on c.id_user = u.id_user WHERE id_hotel_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
         let result = {};
         result.count = count[0].total;
         result.customers = rows;
@@ -108,7 +108,7 @@ export default class CustomerRepository {
 
     async getCustomerInfoByPlaneBooking(id_booking, limit, offset) {
         const [count] = await connection.execute("SELECT COUNT(c.id_customer) as total FROM `plane_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_plane_booking= ?", [id_booking]);
-        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname FROM `plane_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer WHERE id_plane_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
+        const [rows] = await connection.execute("SELECT sc2.id_stay, c.firstname, c.lastname, u.email FROM `plane_booking` AS hb INNER JOIN stay_customer AS sc ON sc.id_customer=hb.id_customer INNER JOIN stay_customer AS sc2 ON sc.id_stay=sc2.id_stay INNER JOIN customer AS c ON sc2.id_customer=c.id_customer LEFT JOIN user u on c.id_user = u.id_user WHERE id_plane_booking= ? LIMIT ? OFFSET ?", [id_booking, limit, offset]);
         let result = {};
         result.count = count[0].total;
         result.customers = rows;

@@ -153,7 +153,10 @@ export default class TravelApi {
      *
      */
     async getById(req, res) {
+        const page = 0;
+        const limit = 10; // nombre d'éléments par page
         const result = await travelRepository.getById(req.params.id);
+        console.log(result);
         if(result.travel.length > 0){
             return res
                 .status(200)
@@ -271,9 +274,9 @@ export default class TravelApi {
             req.body
         );
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
 
@@ -319,9 +322,9 @@ export default class TravelApi {
     async deleteTravel(req, res) {
         const result = await travelRepository.deleteTravel(req.params.id);
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
-        } else {
-            return res.status(404).json(affectedRow);
+            return res.status(200).json(result);
+        } else {result
+            return res.status(404).json(result);
         }
     }
 }

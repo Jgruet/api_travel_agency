@@ -27,16 +27,23 @@ export default class StayRepository {
     }
 
     async createStay(stay) {
-        const insertRq = await connection.execute(
-            "INSERT INTO `stay` (id_travel, start_at, end_at, id_main_customer) VALUES (?, ?, ?, ?)",
-            [stay.id_travel, stay.start_at, stay.end_at, stay.id_main_customer]
-        );
-        return {"insertId" : insertRq[0].insertId};
+        try {
+            const insertRq = await connection.execute(
+                "INSERT INTO `stay` (id_travel, start_at, end_at, id_main_customer) VALUES (?, ?, ?, ?)",
+                [stay.id_travel, stay.start_at, stay.end_at, stay.id_main_customer]
+            );
+            return {"insertId" : insertRq[0].insertId};
+        } catch (error) {
+            if(error.code === "ER_NO_REFERENCED_ROW_2"){
+                return {SQLError : "Specified customer does not exist"};
+            }
+        }
+        
     }
 
     async updateStay(id, stay) {
         const updateRq = await connection.execute(
-            "UPDATE `stay` SET `id_travel` = ?, `start_at` = ?, `end_at` = ?, id_main_customer` = ? WHERE `stay`.`id_stay` = ?",
+            "UPDATE `stay` SET `id_travel` = ?, `start_at` = ?, `end_at` = ?, `id_main_customer` = ? WHERE `stay`.`id_stay` = ?",
             [
                 stay.id_travel,
                 stay.start_at,

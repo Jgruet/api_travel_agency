@@ -21,7 +21,7 @@ export default class TravelRepository {
         );
         let result = {};
         result.count = count[0].total;
-        result.stay = rows;
+        result.travel = rows;
         return result;
     }
 
@@ -41,7 +41,7 @@ export default class TravelRepository {
 
     async updateTravel(id, travel) {
         const updateRq = await connection.execute(
-            "UPDATE `travel` SET `destination` = ?, `id_hotel` = ?, `board_type` = ?, margin` = ?, `reduction` = ? WHERE `travel`.`id_travel` = ?",
+            "UPDATE `travel` SET `destination` = ?, `id_hotel` = ?, `board_type` = ?, `margin` = ?, `reduction` = ? WHERE `travel`.`id_travel` = ?",
             [
                 travel.destination,
                 travel.id_hotel,

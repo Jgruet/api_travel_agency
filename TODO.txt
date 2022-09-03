@@ -1,7 +1,16 @@
-Done :
-test requêtes customers classiques
+---TO DO AVANT SEMAINE PRO 
+Repasse sur la doc
 
-to do : 
-test requêtes customers spéciaes
-vérifier doc customers
-test/doc autre composant
+
+---Notes pour la prochaine semaine de cours 
+Pour des raisons de tests, l'authentification par clé d'api a été court_circuité service.authApi.js L27/28
+Cela sera à réactiver après avoir mis en place le système de connexion + demande clé api via appli web
+
+ngrok a été téléchargé et est dispo pour créer un tunnel
+
+---TO DO semaine pro
+Créer une app web 
+Système de création d'utilisateur
+Système de connexion
+Système de fournisseur de clé API partenaire (tous les utilisateurs en ont une publique de base)
+Système de role

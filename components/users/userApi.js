@@ -197,8 +197,12 @@ export default class UserApi {
      *
      */
     async createUser(req, res) {
-        const insertId = await userRepository.createUser(req.body);
-        res.status(200).json(insertId);
+        const result = await userRepository.createUser(req.body);
+        if(result.SQLError != ""){
+            res.status(400).json(result);
+        } else {
+            res.status(200).json(result);
+        }
     }
 
     /**
@@ -259,9 +263,9 @@ export default class UserApi {
             req.body
         );
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
 
@@ -309,9 +313,9 @@ export default class UserApi {
             req.params.id
         );
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
 
@@ -320,10 +324,11 @@ export default class UserApi {
             req.body.email,
             req.body.password
         )
-        if(result.length > 0){
-            return res.status(200).json(result);
-        } else {
+        console.log(result)
+        if(result.errorMsg){
             return res.status(401).json(result);
+        } else {
+            return res.status(200).json(result);
         }
         //TO DO : inscrire les infos en session client
     }

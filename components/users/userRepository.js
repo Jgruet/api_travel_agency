@@ -7,16 +7,22 @@ export default class UserRepository {
         const [count] = await connection.execute(
             `SELECT COUNT(id_user) as total FROM user`
         );
-        const [rows] = await connection.execute(`SELECT * FROM user LIMIT ? OFFSET ?`, [limit, offset]);
+        const [rows] = await connection.execute(
+            `SELECT * FROM user LIMIT ? OFFSET ?`,
+            [limit, offset]
+        );
         let result = {};
         result.count = count[0].total;
+        rows.map((row) => delete row.password);
         result.users = rows;
+        console.log(result.users);
         return result;
     }
 
     async getById(id) {
         const [count] = await connection.execute(
-            `SELECT COUNT(id_user) as total FROM user WHERE id_user = ?`, [id]
+            `SELECT COUNT(id_user) as total FROM user WHERE id_user = ?`,
+            [id]
         );
         const [rows] = await connection.execute(
             "SELECT * FROM `user` WHERE `id_user` = ?",
@@ -24,6 +30,7 @@ export default class UserRepository {
         );
         let result = {};
         result.count = count[0].total;
+        delete rows[0].password;
         result.user = rows;
         return result;
     }
@@ -37,32 +44,28 @@ export default class UserRepository {
         // set uuid to new user
         user.uuid = uuidAPIKey.create().uuid;
         // set default role
-        user.role = 'public';
-        const insertRq = await connection.execute(
-            "INSERT INTO `user` (`uuid`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)",
-            [
-                user.uuid,
-                user.email,
-                user.password,
-                user.role
-            ]
-        );
-        return {"insertId" : insertRq[0].insertId};
+        user.role = "public";
+        try {
+            const insertRq = await connection.execute(
+                "INSERT INTO `user` (`uuid`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)",
+                [user.uuid, user.email, user.password, user.role]
+            );
+            return { insertId: insertRq[0].insertId };
+        } catch (error) {
+            if (error.code === "ER_DUP_ENTRY") {
+                return {
+                    SQLError: "User id not avaible",
+                };
+            }
+        }
     }
 
     async updateUser(id, user) {
         const updateRq = await connection.execute(
             "UPDATE `user` SET `uuid` = ?, `email` = ?, `password` = ?, `role` = ? WHERE `user`.`id_user` = ?",
-            [
-                user.uuid,
-                user.email,
-                user.password,
-                user.role,
-                id,
-            ]
+            [user.uuid, user.email, user.password, user.role, id]
         );
-        return {"affectedRows" : updateRq[0].affectedRows};
-    
+        return { affectedRows: updateRq[0].affectedRows };
     }
 
     async deleteUser(id) {
@@ -70,7 +73,7 @@ export default class UserRepository {
             "DELETE FROM `user` WHERE `user`.`id_user` = ?",
             [id]
         );
-        return {"affectedRows" : deleteRq[0].affectedRows};
+        return { affectedRows: deleteRq[0].affectedRows };
     }
 
     /* async selectById(id) {
@@ -89,12 +92,24 @@ export default class UserRepository {
     } */
 
     async findByUUID(uuid) {
-        const result = await connection.execute("SELECT * FROM user WHERE uuid=?", [uuid]);
-        if(result[0].length === 0)  throw new Error;        
+        const result = await connection.execute(
+            "SELECT * FROM user WHERE uuid=?",
+            [uuid]
+        );
+        if (result[0].length === 0) throw new Error();
     }
 
     async connectUser(email, password) {
-        const [result] = await connection.execute("SELECT * FROM user WHERE email= ?", [email]);
+        console.log(email);
+        console.log(password);
+        const [result] = await connection.execute(
+            "SELECT * FROM user WHERE email= ?",
+            [email]
+        );
+        console.log(result);
+        if(result.length === 0){
+            return {errorMsg : 'Utilisateur inconnu'};
+        }
         if (bcrypt.compareSync(password, result[0].password)) {
             delete result[0].password;
             return result[0];
@@ -102,6 +117,6 @@ export default class UserRepository {
     }
 
     async clearUsers() {
-        await connection.execute('DELETE FROM `user` WHERE 1');
+        await connection.execute("DELETE FROM `user` WHERE 1");
     }
 }

@@ -1,4 +1,5 @@
 import StayRepository from "./stayRepository.js";
+import data from "../../service/service.dataResponse.js";
 
 const stayRepository = new StayRepository();
 
@@ -208,8 +209,12 @@ export default class StayApi {
      *
      */
     async createStay(req, res) {
-        const insertId = await stayRepository.createStay(req.body);
-        res.status(200).json(insertId);
+        const result = await stayRepository.createStay(req.body);
+        if(result.SQLError != ""){
+            res.status(404).json(result);
+        } else {
+            res.status(200).json(result);
+        }
     }
 
     /**
@@ -272,9 +277,9 @@ export default class StayApi {
             req.body
         );
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
     /**
@@ -319,9 +324,9 @@ export default class StayApi {
     async deleteStay(req, res) {
         const result = await stayRepository.deleteStay(req.params.id);
         if(result.affectedRows === 1){
-            return res.status(200).json(affectedRow);
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(affectedRow);
+            return res.status(404).json(result);
         }
     }
 }
