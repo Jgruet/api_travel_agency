@@ -1,5 +1,6 @@
 import UserRepository from "./userRepository.js";
 import data from "../../service/service.dataResponse.js";
+import ErrorApi from "../../service/service.errorApi.js";
 
 const userRepository = new UserRepository();
 
@@ -188,6 +189,15 @@ export default class UserApi {
      *       "status": "error"
      *      }
      *
+     * @apiError {json} user-id-not-available User id already taken
+     * @apiErrorExample {json} Error-User-ID-Response:
+     *     HTTP/1.1 400 BAD REQUEST
+     *     {
+     *         "message": "User id not avaible",
+     *          "code": 400,
+     *          "status": "error"
+     *     }
+     * 
      * @apiSuccess {json} result User created.
      * @apiSuccessExample {json} Success-Response:
      *     HTTP/1.1 201 OK
@@ -196,10 +206,15 @@ export default class UserApi {
      *     }
      *
      */
-    async createUser(req, res) {
+    async createUser(req, res, next) {
         const result = await userRepository.createUser(req.body);
         if(result.SQLError != ""){
-            res.status(400).json(result);
+            next(
+                new ErrorApi(result.SQLError, 400),
+                req,
+                res,
+                next
+            );
         } else {
             res.status(200).json(result);
         }
@@ -319,14 +334,67 @@ export default class UserApi {
         }
     }
 
-    async connectUser(req, res) {
+    /**
+     * @api {post} /api/users/connect Connect a user
+     * @apiName connectUser
+     * @apiGroup Users
+     *
+     * @apiBody {String} email       User's email
+     * @apiBody {String} password          User's password.
+     * @apiParamExample {json} User-Example:
+     * {
+     *  "email": "john@doe.com",
+     *  "password": "p4ssw0rd"
+     * }
+     *
+     * @apiHeader {String} authorization x-api-key <API_KEY>
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "x-api-key": "1EEA6DC-JAM4DP2-PHVYPBN-V0XCJ9X"
+     *     }
+     *
+     * @apiError {json} incorrect-api-key API key is not well formed or not bind to existing uuid.
+     * @apiErrorExample {json} Error-Response:
+     *     HTTP/1.1 401 UNAUTHORIZED
+     *     {
+     *       "message": "Authentication failed",
+     *       "code": 401,
+     *       "status": "error"
+     *      }
+     *
+     * @apiError {json} not-found User not found.
+     * @apiErrorExample {json} Error-User-Not-Found-Response:
+     *     HTTP/1.1 404 NOT FOUND
+     *     {
+     *       "message": "Utilisateur inconnu",
+     *       "code": 404,
+     *       "status": "error"
+     *     }
+     *
+     * @apiSuccess {json} result Good credentials.
+     * @apiSuccessExample {json} Good-Credentials-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "id_user": 74,
+     *       "uuid": "1acf7842-e35f-4e27-b6f5-800e7f68b20c",
+     *       "role": "public",
+     *       "email": "john@doe.com"
+     *     }
+     *
+     *
+     */
+    async connectUser(req, res, next) {
         const result = await userRepository.connectUser(
             req.body.email,
             req.body.password
         )
-        console.log(result)
         if(result.errorMsg){
-            return res.status(401).json(result);
+            next(
+                new ErrorApi(result.errorMsg, 404),
+                req,
+                res,
+                next
+            );
         } else {
             return res.status(200).json(result);
         }

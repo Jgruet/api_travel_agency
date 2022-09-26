@@ -1,5 +1,6 @@
 import StayRepository from "./stayRepository.js";
 import data from "../../service/service.dataResponse.js";
+import ErrorApi from "../../service/service.errorApi.js";
 
 const stayRepository = new StayRepository();
 
@@ -156,7 +157,7 @@ export default class StayApi {
         const page = 0;
         const limit = 10; // nombre d'éléments par page
         const result = await stayRepository.getById(req.params.id);
-        if(result.stay.length > 0){
+        if (result.stay.length > 0) {
             return res
                 .status(200)
                 .send(data(result.stay, page, result.count, limit));
@@ -172,17 +173,16 @@ export default class StayApi {
      * @apiName createStay
      * @apiGroup Stays
      *
-     * @apiBody {String} destination       Stay's destination - must be city or region
-     * @apiBody {String} board-type        all-inclusive or half-stay
-     * @apiBody {Number} margin
-     * @apiBody {Number} reduction
-     * @apiParamExample {json} Main-Stay-Example:
+     * @apiBody {String} id_travel        Travel id
+     * @apiBody {Date} start_at         Stay's begin
+     * @apiBody {Date} end_at           Stay's end
+     * @apiBody {Number} id_main_customer         Main customer identifier
+     * @apiParamExample {json} Stay-Example:
      * {
-     *  "destination": "Ajaccio",
-     *  "id_hotel": "xxx999xxx999",
-     *  "board_type": "all-inclusive",
-     *  "margin" : 15,
-     *  "reduction": 5
+     *  "id_travel": "12345",
+     *  "start_at": "2022-09-01",
+     *  "end_at" : '"2022-09-21',
+     *  "id_main_customer": 5
      *  }
      *
      * @apiHeader {String} authorization x-api-key <API_KEY>
@@ -200,6 +200,13 @@ export default class StayApi {
      *       "status": "error"
      *      }
      *
+     * @apiError {json} customer-not-found id_main_customer does not match with existing customer
+     * @apiErrorExample {json} Error-Customer-Not-Found-Response:
+     *     HTTP/1.1 404 NOT FOUND
+     *     {
+     *       "SQLError": "Specified customer does not exist"
+     *     }
+     *
      * @apiSuccess {json} result Stay created.
      * @apiSuccessExample {json} Success-Response:
      *     HTTP/1.1 201 OK
@@ -208,10 +215,11 @@ export default class StayApi {
      *     }
      *
      */
-    async createStay(req, res) {
+    async createStay(req, res, next) {
         const result = await stayRepository.createStay(req.body);
-        if(result.SQLError != ""){
-            res.status(404).json(result);
+        if (result.SQLError != "") {
+            //res.status(404).json(result);
+            next(new ErrorApi(result.SQLError, 404), req, res, next);
         } else {
             res.status(200).json(result);
         }
@@ -272,11 +280,8 @@ export default class StayApi {
      *
      */
     async updateStay(req, res) {
-        const result = await stayRepository.updateStay(
-            req.params.id,
-            req.body
-        );
-        if(result.affectedRows === 1){
+        const result = await stayRepository.updateStay(req.params.id, req.body);
+        if (result.affectedRows === 1) {
             return res.status(200).json(result);
         } else {
             return res.status(404).json(result);
@@ -323,7 +328,7 @@ export default class StayApi {
      */
     async deleteStay(req, res) {
         const result = await stayRepository.deleteStay(req.params.id);
-        if(result.affectedRows === 1){
+        if (result.affectedRows === 1) {
             return res.status(200).json(result);
         } else {
             return res.status(404).json(result);

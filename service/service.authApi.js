@@ -1,7 +1,6 @@
 import uuidAPIKey from "uuid-apikey";
 import RepoUser from "../components/users/userRepository.js";
 import ErrorApi from "./service.errorApi.js";
-import bcrypt from "bcrypt";
 
 const repoUser = new RepoUser();
 

@@ -1,5 +1,6 @@
 import CustomerRepository from "./customerRepository.js";
 import data from "../../service/service.dataResponse.js";
+import ErrorApi from "../../service/service.errorApi.js";
 
 const customerRepository = new CustomerRepository();
 
@@ -213,7 +214,9 @@ export default class CustomerApi {
      * @apiErrorExample {json} Error-Response:
      *     HTTP/1.1 400 BAD REQUEST
      *     {
-     *       "SQLError": "A customer is already bind to the given user"
+     *       "message": "A customer is already bind to the given user",
+     *       "code": 400,
+     *       "status": "error"
      *      }
      *
      * @apiSuccess {json} result Customer created.
@@ -224,10 +227,15 @@ export default class CustomerApi {
      *     }
      *
      */
-    async createCustomer(req, res) {
+    async createCustomer(req, res, next) {
         const result = await customerRepository.createCustomer(req.body);
         if(result.SQLError != ""){
-            res.status(404).json(result);
+            next(
+                new ErrorApi(result.SQLError, 404),
+                req,
+                res,
+                next
+            );
         } else {
             res.status(200).json(result);
         }

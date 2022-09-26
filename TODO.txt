@@ -1,5 +1,7 @@
 ---TO DO AVANT SEMAINE PRO 
 Repasse sur la doc
+Homogénéiser erreurs comme dans stayAPI::create-user 
+Vérifier que les msg soient en anglais
 
 
 ---Notes pour la prochaine semaine de cours 

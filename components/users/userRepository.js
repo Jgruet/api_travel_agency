@@ -100,13 +100,10 @@ export default class UserRepository {
     }
 
     async connectUser(email, password) {
-        console.log(email);
-        console.log(password);
         const [result] = await connection.execute(
             "SELECT * FROM user WHERE email= ?",
             [email]
         );
-        console.log(result);
         if(result.length === 0){
             return {errorMsg : 'Utilisateur inconnu'};
         }
